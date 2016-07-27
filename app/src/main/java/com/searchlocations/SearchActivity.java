@@ -1,18 +1,17 @@
 package com.searchlocations;
 
 import android.app.Activity;
-import android.content.Context;
-import android.widget.SearchView;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class Search extends Activity {
+public class SearchActivity extends Activity {
 
-    @BindView(R.id.searchView) SearchView searchView;
+    @BindView(R.id.editText) EditText textBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,14 +20,12 @@ public class Search extends Activity {
         ButterKnife.bind(this);
     }
 
-    @OnClick(R.id.searchView)
+    @OnClick(R.id.searchButton)
     public void search() {
-        CharSequence searchWord = searchView.getQuery();
-
-        Context context = getApplicationContext();
-        CharSequence text = "Searching for " + searchWord;
+        String searchWord = textBox.getText().toString().trim();
+        String text = (searchWord.isEmpty()) ? "Enter a value" : "Searching for " + searchWord;
         int duration = Toast.LENGTH_SHORT;
 
-        Toast.makeText(context, text, duration).show();
+        Toast.makeText(this, text, duration).show();
     }
 }

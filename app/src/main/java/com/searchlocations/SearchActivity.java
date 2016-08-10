@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -24,6 +25,15 @@ import com.google.android.gms.location.LocationServices;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import com.searchlocations.model.*;
+
+import java.util.List;
 
 public class SearchActivity extends Activity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -38,6 +48,17 @@ public class SearchActivity extends Activity implements
 
     private String mText;
 
+    public static final String BASE_URL = "https://api.foursquare.com/v2/venues/";
+    private final String CLIENT_ID = "DTBSOM4GRROOOLKZ3KAYH0GK4VVH1M4HVFVPQSMBXBGGUKHJ";
+    private final String CLIENT_SECRET = "H3LLXD3FOHSTA5A1RBUKTWIAQSPAAYMLBN5HBVVBOJZFUUB3";
+
+    Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+    FoursquareAPI apiService;
+
     @BindView(R.id.editText) EditText textBox;
 
     @Override
@@ -50,6 +71,8 @@ public class SearchActivity extends Activity implements
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)
                 .build();
+
+        apiService = retrofit.create(FoursquareAPI.class);
     }
     @Override
     protected void onStart() {
@@ -137,11 +160,30 @@ public class SearchActivity extends Activity implements
         if(location != null) {
             double lat = location.getLatitude(), lon = location.getLongitude();
             String message = "Lat: " + lat + ", Long: " + lon;
+            String results;
             if(mText != null){
                 //Busqueda pendiente
-                //Procesa busqueda
+                Call<List<Venue>> call = apiService.getVenues(lat + "," + lon, mText, CLIENT_ID, CLIENT_SECRET);
+                call.enqueue(new Callback<List<Venue>>() {
+                    @Override
+                    public void onResponse(Call<List<Venue>> call, final Response<List<Venue>> response) {
+                        final int venuesTotal = (response.body() != null) ? response.body().size() : 0;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast toast = Toast.makeText(SearchActivity.this, "Found " + venuesTotal + "venues", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.TOP, 0, 0);
+                                toast.show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Venue>> call, Throwable t) {
+
+                    }
+                });
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                Toast.makeText(this, "Procesar texto", Toast.LENGTH_SHORT).show();
                 
                 mText = null;
             }

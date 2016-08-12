@@ -8,9 +8,10 @@ import retrofit2.http.Query;
 
 public interface FoursquareAPI {
 
-    @GET("/search")
-    Call<List<Venue>> getVenues(@Query("ll") String latLong,
+    @GET("/v2/venues/search")
+    Call<VenueResponse> getVenues(@Query("ll") String latLong,
                                 @Query("query") String searchTerm,
                                 @Query("client_id") String clientId,
-                                @Query("client_secret") String clientSecret);
+                                @Query("client_secret") String clientSecret,
+                                @Query("v") String apiVersion);
 }

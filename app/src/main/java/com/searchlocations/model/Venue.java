@@ -1,8 +1,5 @@
 package com.searchlocations.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Venue {
 
     private String id;

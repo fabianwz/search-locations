@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -48,7 +49,7 @@ public class SearchActivity extends Activity implements
 
     private String mText;
 
-    public static final String BASE_URL = "https://api.foursquare.com/v2/venues/";
+    public static final String BASE_URL = "https://api.foursquare.com/";
     private final String CLIENT_ID = "DTBSOM4GRROOOLKZ3KAYH0GK4VVH1M4HVFVPQSMBXBGGUKHJ";
     private final String CLIENT_SECRET = "H3LLXD3FOHSTA5A1RBUKTWIAQSPAAYMLBN5HBVVBOJZFUUB3";
 
@@ -60,6 +61,7 @@ public class SearchActivity extends Activity implements
     FoursquareAPI apiService;
 
     @BindView(R.id.editText) EditText textBox;
+    @BindView(R.id.listView) ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,31 +161,31 @@ public class SearchActivity extends Activity implements
     public void onLocationChanged(Location location) {
         if(location != null) {
             double lat = location.getLatitude(), lon = location.getLongitude();
-            String message = "Lat: " + lat + ", Long: " + lon;
-            String results;
             if(mText != null){
-                //Busqueda pendiente
-                Call<List<Venue>> call = apiService.getVenues(lat + "," + lon, mText, CLIENT_ID, CLIENT_SECRET);
-                call.enqueue(new Callback<List<Venue>>() {
+                Call<VenueResponse> call = apiService.getVenues(lat + "," + lon, mText, CLIENT_ID, CLIENT_SECRET, "20160810");
+                call.enqueue(new Callback<VenueResponse>() {
                     @Override
-                    public void onResponse(Call<List<Venue>> call, final Response<List<Venue>> response) {
-                        final int venuesTotal = (response.body() != null) ? response.body().size() : 0;
+                    public void onResponse(Call<VenueResponse> call, final Response<VenueResponse> response) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast toast = Toast.makeText(SearchActivity.this, "Found " + venuesTotal + "venues", Toast.LENGTH_SHORT);
-                                toast.setGravity(Gravity.TOP, 0, 0);
-                                toast.show();
+                                List<Venue> venues = response.body().response.venues;
+                                int venuesTotal = (venues != null) ? venues.size() : 0;
+                                Toast.makeText(SearchActivity.this, "Found " + venuesTotal + " venues", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
 
                     @Override
-                    public void onFailure(Call<List<Venue>> call, Throwable t) {
-
+                    public void onFailure(Call<VenueResponse> call, Throwable t) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(SearchActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                        }
+                        });
                     }
                 });
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 
                 mText = null;
             }

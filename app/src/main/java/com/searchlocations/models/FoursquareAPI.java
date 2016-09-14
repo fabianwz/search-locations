@@ -1,6 +1,4 @@
-package com.searchlocations.model;
-
-import java.util.List;
+package com.searchlocations.models;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

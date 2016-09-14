@@ -1,4 +1,4 @@
-package com.searchlocations.model;
+package com.searchlocations.models;
 
 import java.util.List;
 
